@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/messages/{message}', [MessageController::class, 'update'])->name('message.update');
     Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->name('message.destroy');
     Route::post('/chats/{chat}/read', [MessageController::class, 'markAsRead'])->name('message.read');
+
+     // Media
+    Route::post('/media', [MediaController::class, 'store'])->name('media.store');
+    Route::delete('/media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
 
 });
 

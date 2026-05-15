@@ -69,12 +69,10 @@
             <div class="flex {{ $message->sender_id === Auth::id() ? 'justify-end' : 'justify-start' }}">
                 <div class="max-w-xs lg:max-w-md">
 
-                    {{-- Sender name (group only) --}}
                     @if($chat->type === 'group' && $message->sender_id !== Auth::id())
                         <p class="mb-1 ml-1 text-xs text-gray-400">{{ $message->sender->name }}</p>
                     @endif
 
-                    {{-- Reply --}}
                     @if($message->replyTo)
                         <div class="text-xs bg-gray-100 dark:bg-gray-700 rounded px-2 py-1 mb-1 border-l-2 border-[#D97757]">
                             <span class="font-medium">{{ $message->replyTo->sender->name }}</span>
@@ -82,7 +80,6 @@
                         </div>
                     @endif
 
-                    {{-- Bubble --}}
                     <div class="px-4 py-2 rounded-2xl text-sm
                         {{ $message->sender_id === Auth::id()
                             ? 'bg-[#D97757] text-white rounded-br-sm'
@@ -90,12 +87,24 @@
 
                         @if($message->is_deleted_for_everyone)
                             <span class="italic opacity-60">Message deleted</span>
+                        @elseif($message->media && $message->media->isImage())
+                            <img src="{{ asset('storage/' . $message->media->path) }}"
+                                class="max-w-xs rounded-lg cursor-pointer"
+                                onclick="window.open('{{ asset('storage/' . $message->media->path) }}', '_blank')">
+                        @elseif($message->media)
+                            <a href="{{ asset('storage/' . $message->media->path) }}" target="_blank"
+                                class="flex items-center gap-2 underline">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                {{ $message->media->original_name }}
+                            </a>
                         @else
                             {{ $message->message }}
                         @endif
                     </div>
 
-                    {{-- Time --}}
                     <p class="text-xs text-gray-400 mt-1 {{ $message->sender_id === Auth::id() ? 'text-right' : 'text-left' }}">
                         {{ $message->created_at->format('h:i A') }}
                         @if($message->is_edited)
@@ -115,7 +124,26 @@
                         :class="message.sender_id === {{ Auth::id() }}
                             ? 'bg-[#D97757] text-white rounded-br-sm'
                             : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-sm'">
-                        <span x-text="message.message"></span>
+
+                        <template x-if="message.media && message.media.type === 'image'">
+                            <img :src="message.media.url" class="max-w-xs rounded-lg cursor-pointer"
+                                @click="window.open(message.media.url, '_blank')">
+                        </template>
+
+                        <template x-if="message.media && message.media.type !== 'image'">
+                            <a :href="message.media.url" target="_blank" class="flex items-center gap-2 underline">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <span x-text="message.media.original_name"></span>
+                            </a>
+                        </template>
+
+                        <template x-if="!message.media">
+                            <span x-text="message.message"></span>
+                        </template>
+
                     </div>
                     <p class="mt-1 text-xs text-gray-400"
                         :class="message.sender_id === {{ Auth::id() }} ? 'text-right' : 'text-left'"
@@ -128,6 +156,15 @@
     {{-- Input --}}
     <div class="p-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
         <div class="flex items-center gap-3">
+
+            <label class="p-2 transition rounded-full cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                </svg>
+                <input type="file" class="hidden" @change="handleFileSelect">
+            </label>
+
             <input
                 type="text"
                 x-model="newMessage"
@@ -135,12 +172,14 @@
                 @input="sendTyping"
                 placeholder="Type a message..."
                 class="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D97757]">
+
             <button @click="sendMessage"
                 class="w-10 h-10 bg-[#D97757] rounded-full flex items-center justify-center hover:bg-[#c4684a] transition shrink-0">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                 </svg>
             </button>
+
         </div>
     </div>
 
@@ -183,81 +222,3 @@
 </div>
 
 @endsection
-
-@push('scripts')
-<script>
-function chatApp(chatId) {
-    return {
-        chatId: chatId,
-        newMessage: '',
-        messages: [],
-        typingText: '',
-        typingTimeout: null,
-
-        init() {
-            this.scrollToBottom();
-            this.listenForMessages();
-            this.markAsRead();
-        },
-
-        scrollToBottom() {
-            this.$nextTick(() => {
-                const container = document.getElementById('messageContainer');
-                if (container) container.scrollTop = container.scrollHeight;
-            });
-        },
-
-        async sendMessage() {
-            if (!this.newMessage.trim()) return;
-
-            const response = await fetch(`/chats/${this.chatId}/messages`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                },
-                body: JSON.stringify({
-                    message: this.newMessage,
-                    type: 'text',
-                }),
-            });
-
-            const message = await response.json();
-            this.messages.push(message);
-            this.newMessage = '';
-            this.scrollToBottom();
-        },
-
-        sendTyping() {
-            window.Echo.private(`chat.${this.chatId}`)
-                .whisper('typing', { name: '{{ Auth::user()->name }}' });
-        },
-
-        listenForMessages() {
-            window.Echo.private(`chat.${this.chatId}`)
-                .listen('.message.sent', (e) => {
-                    this.messages.push(e.message);
-                    this.scrollToBottom();
-                    this.markAsRead();
-                })
-                .listenForWhisper('typing', (e) => {
-                    this.typingText = `${e.name} is typing...`;
-                    clearTimeout(this.typingTimeout);
-                    this.typingTimeout = setTimeout(() => {
-                        this.typingText = '';
-                    }, 2000);
-                });
-        },
-
-        async markAsRead() {
-            await fetch(`/chats/${this.chatId}/read`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                },
-            });
-        },
-    }
-}
-</script>
-@endpush
