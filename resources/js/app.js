@@ -1,9 +1,7 @@
-import './bootstrap';
-
-import Alpine from 'alpinejs';
+import "./bootstrap";
+import Alpine from "alpinejs";
 
 window.Alpine = Alpine;
-
 Alpine.start();
 
 /**
@@ -12,4 +10,4 @@ Alpine.start();
  * allow your team to quickly build robust real-time web applications.
  */
 
-import './echo';
+// import './echo';
