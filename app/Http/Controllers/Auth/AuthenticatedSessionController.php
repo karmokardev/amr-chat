@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Events\UserOnlineStatusChanged;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -36,6 +38,16 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+        if ($user){
+            $user->update([
+                'is_online'    => false,
+                'last_seen_at' => now(),
+            ]);
+            broadcast(new UserOnlineStatusChanged($user, false));
+        }
+
+    
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
