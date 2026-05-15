@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CallController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MessageController;
@@ -30,10 +31,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->name('message.destroy');
     Route::post('/chats/{chat}/read', [MessageController::class, 'markAsRead'])->name('message.read');
 
-     // Media
+    // Media
     Route::post('/media', [MediaController::class, 'store'])->name('media.store');
     Route::delete('/media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
 
+    // Call
+    Route::post('/chats/{chat}/call', [CallController::class, 'initiate'])->name('call.initiate');
+    Route::post('/call-rooms/{callRoom}/join', [CallController::class, 'join'])->name('call.join');
+    Route::post('/call-rooms/{callRoom}/leave', [CallController::class, 'leave'])->name('call.leave');
+    Route::post('/call-rooms/{callRoom}/signal', [CallController::class, 'signal'])->name('call.signal');
 });
 
 require __DIR__.'/auth.php';

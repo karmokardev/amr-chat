@@ -9,3 +9,7 @@ Broadcast::channel('chat.{chatId}', function ($user, int $chatId) {
         ->where('user_id', $user->id)
         ->exists() ?? false;
 });
+
+Broadcast::channel('call.{callRoomId}.{userId}', function ($user, int $callRoomId, int $userId) {
+    return (int) $user->id === $userId;
+});
