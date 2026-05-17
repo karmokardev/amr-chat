@@ -74,6 +74,7 @@ document.addEventListener("alpine:init", () => {
         typingTimeout: null,
 
         // Call state
+        replyTo: null,
         incomingCall: null,
         activeCall: null,
         callRoom: null,
@@ -89,6 +90,9 @@ document.addEventListener("alpine:init", () => {
             this.listenForMessages();
             this.markAsRead();
             this.listenForOnlineStatus();
+            window.addEventListener("set-reply", (e) => {
+                this.replyTo = e.detail;
+            });
         },
 
         listenForOnlineStatus() {
@@ -117,6 +121,18 @@ document.addEventListener("alpine:init", () => {
                 if (container) container.scrollTop = container.scrollHeight;
             });
         },
+        setReply(message) {
+            this.replyTo = message;
+            this.$nextTick(() => {
+                document
+                    .querySelector('input[placeholder="Type a message..."]')
+                    .focus();
+            });
+        },
+
+        clearReply() {
+            this.replyTo = null;
+        },
 
         // send message
         async sendMessage() {
@@ -136,11 +152,13 @@ document.addEventListener("alpine:init", () => {
                     body: JSON.stringify({
                         message: this.newMessage,
                         type: "text",
+                        reply_to_id: this.replyTo?.id ?? null,
                     }),
                 });
 
                 const message = await response.json();
                 this.messages.push(message);
+                this.replyTo = null;
                 this.newMessage = "";
                 this.scrollToBottom();
             } catch (err) {

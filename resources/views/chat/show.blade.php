@@ -213,7 +213,19 @@
 
             <div class="flex {{ $message->sender_id === Auth::id() ? 'justify-end' : 'justify-start' }}">
 
-                <div class="max-w-xs lg:max-w-md">
+                <div class="max-w-xs lg:max-w-md group">
+
+                    {{-- Reply button --}}
+                    <div class="flex {{ $message->sender_id === Auth::id() ? 'justify-end' : 'justify-start' }} mb-1 opacity-0 group-hover:opacity-100 transition">
+                        <button onclick="window.Alpine && window.dispatchEvent(new CustomEvent('set-reply', { detail: {
+                            id: {{ $message->id }},
+                            message: '{{ addslashes($message->message) }}',
+                            sender: { name: '{{ addslashes($message->sender->name) }}' }
+                        }}))"
+                            class="text-xs text-gray-400 hover:text-[#D97757] transition px-2">
+                            ↩ Reply
+                        </button>
+                    </div>
 
                     <div class="px-4 py-2 rounded-2xl text-sm
                         {{ $message->sender_id === Auth::id()
@@ -257,7 +269,16 @@
             <div class="flex"
                 :class="message.sender_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start'">
 
-                <div class="max-w-xs lg:max-w-md">
+                <div class="max-w-xs lg:max-w-md group">
+
+                    {{-- Reply button --}}
+                    <div class="flex mb-1 transition opacity-0 group-hover:opacity-100"
+                        :class="message.sender_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start'">
+                        <button @click="setReply(message)"
+                            class="text-xs text-gray-400 hover:text-[#D97757] transition px-2">
+                            ↩ Reply
+                        </button>
+                    </div>
 
                     <div class="px-4 py-2 text-sm rounded-2xl"
                         :class="message.sender_id === {{ Auth::id() }}
@@ -278,6 +299,20 @@
 
     {{-- Input --}}
     <div class="p-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
+
+        {{-- Reply Preview --}}
+        <div x-show="replyTo !== null" x-cloak
+            class="flex items-center gap-2 px-3 py-2 mb-2 bg-gray-100 dark:bg-gray-800 rounded-xl">
+            <div class="flex-1 min-w-0 border-l-2 border-[#D97757] pl-2">
+                <p class="text-xs font-medium text-[#D97757]" x-text="replyTo?.sender?.name"></p>
+                <p class="text-xs text-gray-500 truncate" x-text="replyTo?.message"></p>
+            </div>
+            <button @click="clearReply" class="text-gray-400 hover:text-gray-600 shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
 
         <div class="flex items-center gap-3">
 
