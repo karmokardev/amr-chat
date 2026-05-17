@@ -114,7 +114,14 @@ document.addEventListener("alpine:init", () => {
                     this.markAsRead();
                 })
                 .listen(".call.initiated", (e) => {
-                    this.incomingCall = e;
+                    // নিজের call নিজে দেখবে না
+                    const myId = parseInt(
+                        document.querySelector('meta[name="user-id"]')
+                            ?.content ?? 0,
+                    );
+                    if (e.caller.id !== myId) {
+                        this.incomingCall = e;
+                    }
                 })
                 .listenForWhisper("typing", (e) => {
                     this.typingText = `${e.name} is typing...`;
@@ -122,6 +129,17 @@ document.addEventListener("alpine:init", () => {
                     this.typingTimeout = setTimeout(() => {
                         this.typingText = "";
                     }, 2000);
+                })
+                .listen(".call.ended", (e) => {
+                    if (this.activeCall) {
+                        this.peerConnection?.close();
+                        this.localStream?.getTracks().forEach((t) => t.stop());
+                        this.activeCall = null;
+                        this.callRoom = null;
+                        this.peerConnection = null;
+                        this.localStream = null;
+                        alert("Call ended.");
+                    }
                 });
         },
 
@@ -207,15 +225,41 @@ document.addEventListener("alpine:init", () => {
         },
 
         async setupLocalStream(video = true) {
-            this.localStream = await navigator.mediaDevices.getUserMedia({
-                audio: true,
-                video: video,
-            });
+            try {
+                // browser support check
+                if (
+                    typeof navigator === "undefined" ||
+                    !navigator.mediaDevices ||
+                    !navigator.mediaDevices.getUserMedia
+                ) {
+                    console.error("getUserMedia not supported");
 
-            this.$nextTick(() => {
-                const localVideo = document.getElementById("localVideo");
-                if (localVideo) localVideo.srcObject = this.localStream;
-            });
+                    alert(
+                        "Camera/Microphone API not supported.\nUse HTTPS or localhost.",
+                    );
+
+                    return;
+                }
+
+                // get media
+                this.localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: video,
+                });
+
+                // set local video
+                this.$nextTick(() => {
+                    const localVideo = document.getElementById("localVideo");
+
+                    if (localVideo) {
+                        localVideo.srcObject = this.localStream;
+                    }
+                });
+            } catch (error) {
+                console.error("Media Device Error:", error);
+
+                alert("Camera/Microphone permission denied.");
+            }
         },
 
         async createPeerConnection() {
