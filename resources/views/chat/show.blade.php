@@ -90,9 +90,17 @@
                                 : $item->members->where('id', '!=', Auth::id())->first()?->name ?? 'Unknown' }}
                         </span>
 
-                        <span class="ml-2 text-xs text-gray-400 shrink-0">
-                            {{ $item->lastMessage?->created_at?->diffForHumans(short: true) }}
-                        </span>
+                        <div class="flex flex-col items-end gap-1 ml-2 shrink-0">
+                            <span class="text-xs text-gray-400">
+                                {{ $item->lastMessage?->created_at?->diffForHumans(short: true) }}
+                            </span>
+                            @php $unread = $item->unreadCount(Auth::id()); @endphp
+                            @if($unread > 0)
+                                <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-[#D97757] rounded-full">
+                                    {{ $unread > 99 ? '99+' : $unread }}
+                                </span>
+                            @endif
+                        </div>
 
                     </div>
 

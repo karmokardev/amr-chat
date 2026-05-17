@@ -46,4 +46,18 @@ class Chat extends Model
     {
         return $this->hasMany(ChatMember::class);
     }
+
+    public  function unreadCount(int $userId): int 
+    {
+        $member = $this->chatMembers()->where('user_id', $userId)->first();
+
+        if(!$member || !$member->last_read_message_id){
+            return $this->messages()->count();
+        }
+
+        return $this->messages()
+        ->where('id', '>', $member->last_read_message_id)
+        ->where('sender_id', '!=', $userId)
+        ->count();
+    }
 }

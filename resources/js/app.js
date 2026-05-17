@@ -235,6 +235,12 @@ document.addEventListener("alpine:init", () => {
                     ).content,
                 },
             });
+
+            // Sidebar এ unread badge clear করো
+            const sidebar = document.querySelector(
+                `a[href="/chats/${this.chatId}"] .bg-\\[\\#D97757\\].rounded-full.w-5`,
+            );
+            if (sidebar) sidebar.remove();
         },
 
         // Call methods
