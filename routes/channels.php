@@ -13,3 +13,6 @@ Broadcast::channel('chat.{chatId}', function ($user, int $chatId) {
 Broadcast::channel('call.{callRoomId}.{userId}', function ($user, int $callRoomId, int $userId) {
     return (int) $user->id === $userId;
 });
+Broadcast::channel('online-status', function () {
+    return true;
+});

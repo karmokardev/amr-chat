@@ -70,8 +70,26 @@
                 class="flex items-center gap-3 px-4 py-3 transition border-b border-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700">
 
                 {{-- Avatar --}}
-                <div class="w-10 h-10 rounded-full bg-[#D97757] flex items-center justify-center text-white font-bold shrink-0">
-                    {{ strtoupper(substr($chat->type === 'group' ? $chat->name : $chat->members->where('id', '!=', Auth::id())->first()?->name ?? 'U', 0, 1)) }}
+                <div class="relative w-10 h-10 shrink-0">
+                    @php
+                        $otherMember = $chat->type === 'private'
+                            ? $chat->members->where('id', '!=', Auth::id())->first()
+                            : null;
+                    @endphp
+
+                    @if($otherMember?->avatar)
+                        <img src="{{ asset('storage/' . $otherMember->avatar) }}"
+                            class="object-cover w-10 h-10 rounded-full">
+                    @else
+                        <div class="w-10 h-10 rounded-full bg-[#D97757] flex items-center justify-center text-white font-bold">
+                            {{ strtoupper(substr($chat->type === 'group' ? $chat->name : $otherMember?->name ?? 'U', 0, 1)) }}
+                        </div>
+                    @endif
+
+                    {{-- Online indicator --}}
+                    @if($chat->type === 'private' && $otherMember?->is_online)
+                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full dark:border-gray-900"></span>
+                    @endif
                 </div>
 
                 {{-- Info --}}

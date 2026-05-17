@@ -88,8 +88,29 @@ document.addEventListener("alpine:init", () => {
             this.scrollToBottom();
             this.listenForMessages();
             this.markAsRead();
+            this.listenForOnlineStatus();
         },
 
+        listenForOnlineStatus() {
+            window.Echo.channel("online-status").listen(
+                ".user.status.changed",
+                (e) => {
+                    // Sidebar এ online indicator update
+                    const indicators = document.querySelectorAll(
+                        `[data-user-id="${e.user_id}"]`,
+                    );
+                    indicators.forEach((el) => {
+                        if (e.is_online) {
+                            el.classList.remove("bg-gray-300");
+                            el.classList.add("bg-green-400");
+                        } else {
+                            el.classList.remove("bg-green-400");
+                            el.classList.add("bg-gray-300");
+                        }
+                    });
+                },
+            );
+        },
         scrollToBottom() {
             this.$nextTick(() => {
                 const container = document.getElementById("messageContainer");

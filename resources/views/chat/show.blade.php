@@ -76,8 +76,26 @@
                 class="flex items-center gap-3 px-4 py-3 transition border-b border-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700
                 {{ $item->id === $chat->id ? 'bg-orange-50 dark:bg-gray-800 border-l-2 border-l-[#D97757]' : '' }}">
 
-                <div class="w-10 h-10 rounded-full bg-[#D97757] flex items-center justify-center text-white font-bold shrink-0">
-                    {{ strtoupper(substr($item->type === 'group' ? $item->name : $item->members->where('id', '!=', Auth::id())->first()?->name ?? 'U', 0, 1)) }}
+                {{-- Avatar --}}
+                <div class="relative w-10 h-10 shrink-0">
+                    @php
+                        $otherMember = $item->type === 'private'
+                            ? $item->members->where('id', '!=', Auth::id())->first()
+                            : null;
+                    @endphp
+
+                    @if($otherMember?->avatar)
+                        <img src="{{ asset('storage/' . $otherMember->avatar) }}"
+                            class="object-cover w-10 h-10 rounded-full">
+                    @else
+                        <div class="w-10 h-10 rounded-full bg-[#D97757] flex items-center justify-center text-white font-bold">
+                            {{ strtoupper(substr($item->type === 'group' ? $item->name : $otherMember?->name ?? 'U', 0, 1)) }}
+                        </div>
+                    @endif
+
+                    @if($item->type === 'private' && $otherMember?->is_online)
+                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-white rounded-full dark:border-gray-900"></span>
+                    @endif
                 </div>
 
                 <div class="flex-1 min-w-0">
@@ -134,8 +152,19 @@
 
         <div class="flex items-center gap-3">
 
-            <div class="w-9 h-9 rounded-full bg-[#D97757] flex items-center justify-center text-white font-bold text-sm">
-                {{ strtoupper(substr($chat->type === 'group' ? $chat->name : $otherUser?->name ?? 'U', 0, 1)) }}
+            <div class="relative shrink-0">
+                @if($otherUser?->avatar)
+                    <img src="{{ asset('storage/' . $otherUser->avatar) }}"
+                        class="object-cover rounded-full w-9 h-9">
+                @else
+                    <div class="w-9 h-9 rounded-full bg-[#D97757] flex items-center justify-center text-white font-bold text-sm">
+                        {{ strtoupper(substr($chat->type === 'group' ? $chat->name : $otherUser?->name ?? 'U', 0, 1)) }}
+                    </div>
+                @endif
+
+                @if($chat->type === 'private' && $otherUser?->is_online)
+                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full dark:border-gray-900"></span>
+                @endif
             </div>
 
             <div>
@@ -143,7 +172,9 @@
                     {{ $chat->type === 'group' ? $chat->name : $otherUser?->name ?? 'Unknown' }}
                 </p>
 
-                <p class="text-xs text-gray-400" x-text="typingText"></p>
+                <p class="text-xs text-gray-400"
+                    x-text="typingText || '{{ $chat->type === 'private' ? ($otherUser?->is_online ? 'Online' : 'Last seen ' . ($otherUser?->last_seen_at?->diffForHumans() ?? 'a while ago')) : '' }}'">
+                </p>
             </div>
 
         </div>
