@@ -19,6 +19,8 @@ document.addEventListener("alpine:init", () => {
         isVideoEnabled: true,
         localStream: null,
         peerConnection: null,
+        isSending: false,
+        isUploading: false,
 
         init() {
             this.scrollToBottom();
@@ -34,63 +36,80 @@ document.addEventListener("alpine:init", () => {
         },
 
         async sendMessage() {
-            if (!this.newMessage.trim()) return;
+            if (!this.newMessage.trim() || this.isSending) return;
 
-            const response = await fetch(`/chats/${this.chatId}/messages`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": document.querySelector(
-                        'meta[name="csrf-token"]',
-                    ).content,
-                },
-                body: JSON.stringify({
-                    message: this.newMessage,
-                    type: "text",
-                }),
-            });
+            this.isSending = true;
 
-            const message = await response.json();
-            this.messages.push(message);
-            this.newMessage = "";
-            this.scrollToBottom();
+            try {
+                const response = await fetch(`/chats/${this.chatId}/messages`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector(
+                            'meta[name="csrf-token"]',
+                        ).content,
+                    },
+                    body: JSON.stringify({
+                        message: this.newMessage,
+                        type: "text",
+                    }),
+                });
+
+                const message = await response.json();
+                this.messages.push(message);
+                this.newMessage = "";
+                this.scrollToBottom();
+            } catch (err) {
+                alert("Message send failed. Try again.");
+            } finally {
+                this.isSending = false;
+            }
         },
 
         async sendFile(file) {
-            const formData = new FormData();
-            formData.append("file", file);
+            if (this.isUploading) return;
+            this.isUploading = true;
 
-            const uploadRes = await fetch("/media", {
-                method: "POST",
-                headers: {
-                    "X-CSRF-TOKEN": document.querySelector(
-                        'meta[name="csrf-token"]',
-                    ).content,
-                },
-                body: formData,
-            });
+            try {
+                const formData = new FormData();
+                formData.append("file", file);
 
-            const media = await uploadRes.json();
+                const uploadRes = await fetch("/media", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector(
+                            'meta[name="csrf-token"]',
+                        ).content,
+                    },
+                    body: formData,
+                });
 
-            const msgRes = await fetch(`/chats/${this.chatId}/messages`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": document.querySelector(
-                        'meta[name="csrf-token"]',
-                    ).content,
-                },
-                body: JSON.stringify({
-                    type: media.type,
-                    media_id: media.id,
-                    message: media.original_name,
-                }),
-            });
+                const media = await uploadRes.json();
 
-            const message = await msgRes.json();
-            message.media = media;
-            this.messages.push(message);
-            this.scrollToBottom();
+                const msgRes = await fetch(`/chats/${this.chatId}/messages`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector(
+                            'meta[name="csrf-token"]',
+                        ).content,
+                    },
+                    body: JSON.stringify({
+                        type: media.type,
+                        media_id: media.id,
+                        message: media.original_name,
+                    }),
+                });
+
+                const message = await msgRes.json();
+                message.media = media;
+                this.messages.push(message);
+                this.scrollToBottom();
+            } catch (err) {
+                alert("File upload failed. Try again.");
+            } finally {
+                this.isUploading = false;
+            }
         },
 
         handleFileSelect(event) {

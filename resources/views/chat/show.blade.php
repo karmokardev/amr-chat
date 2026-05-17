@@ -134,7 +134,24 @@
                             ? 'bg-[#D97757] text-white rounded-br-sm'
                             : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-sm' }}">
 
-                        {{ $message->message }}
+                        @if($message->is_deleted_for_everyone)
+                            <span class="italic opacity-60">Message deleted</span>
+                        @elseif($message->media?->isImage())
+                            <img src="{{ asset('storage/' . $message->media->path) }}"
+                                class="max-w-xs rounded-lg cursor-pointer"
+                                onclick="window.open('{{ asset('storage/' . $message->media->path) }}', '_blank')">
+                        @elseif($message->media)
+                            <a href="{{ asset('storage/' . $message->media->path) }}" target="_blank"
+                                class="flex items-center gap-2 underline">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                {{ $message->media->original_name }}
+                            </a>
+                        @else
+                            {{ $message->message }}
+                        @endif
 
                     </div>
 
@@ -178,6 +195,20 @@
 
         <div class="flex items-center gap-3">
 
+            {{-- File attach button --}}
+            <label class="p-2 transition rounded-full cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0"
+                :class="isUploading ? 'opacity-50 pointer-events-none' : ''">
+                <svg x-show="!isUploading" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                </svg>
+                <svg x-show="isUploading" class="w-5 h-5 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                </svg>
+                <input type="file" class="hidden" @change="handleFileSelect">
+            </label>
+
             <input
                 type="text"
                 x-model="newMessage"
@@ -186,14 +217,15 @@
                 placeholder="Type a message..."
                 class="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D97757]">
 
-            <button @click="sendMessage"
-                class="w-10 h-10 bg-[#D97757] rounded-full flex items-center justify-center hover:bg-[#c4684a] transition shrink-0">
-
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+            <button @click="sendMessage" :disabled="isSending"
+                class="w-10 h-10 bg-[#D97757] rounded-full flex items-center justify-center hover:bg-[#c4684a] transition shrink-0 disabled:opacity-50">
+                <svg x-show="!isSending" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                 </svg>
-
+                <svg x-show="isSending" class="w-5 h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                </svg>
             </button>
 
         </div>

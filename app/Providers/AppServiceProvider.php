@@ -7,6 +7,7 @@ use App\Models\Chat;
 use App\Policies\ChatPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Horizon\Horizon;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,5 +25,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Chat::class, ChatPolicy::class);
+        
+        Horizon::auth(function ($request) {
+            return $request->user() !== null;
+        });
     }
 }
