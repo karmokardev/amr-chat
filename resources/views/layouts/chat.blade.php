@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{ darkMode: localStorage.getItem('darkMode') === 'true' }" x-bind:class="{ 'dark': darkMode }">
+<html lang="en"
+    x-data="{ darkMode: localStorage.getItem('darkMode') === 'true' }"
+    x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))"
+    :class="darkMode ? 'dark' : ''">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
