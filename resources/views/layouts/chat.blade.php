@@ -35,7 +35,19 @@
             </button>
 
             {{-- User --}}
-            <span class="text-sm font-medium">{{ Auth::user()->name }}</span>
+            <div class="flex items-center gap-2">
+                @if(Auth::user()->avatar)
+                    <img src="{{ asset('storage/' . Auth::user()->avatar) }}"
+                        class="object-cover w-8 h-8 rounded-full">
+                @else
+                    <div class="w-8 h-8 rounded-full bg-[#D97757] flex items-center justify-center text-white text-sm font-bold">
+                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    </div>
+                @endif
+                <a href="{{ route('profile.edit') }}" class="text-sm font-medium hover:text-[#D97757] transition">
+                    {{ Auth::user()->name }}
+                </a>
+            </div>
 
             {{-- Logout --}}
             <form method="POST" action="{{ route('logout') }}">
