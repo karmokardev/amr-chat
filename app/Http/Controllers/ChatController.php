@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Chat;
 use App\Models\ChatMember;
+use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -53,7 +54,9 @@ class ChatController extends Controller
 
 
         if ($existing) {
-            return redirect()->route('chat.show', $existing);
+            return request()->wantsJson()
+                ? response()->json($existing)
+                : redirect()->route('chat.show', $existing);
         }
 
         $chat = Chat::create([
@@ -80,7 +83,10 @@ class ChatController extends Controller
                 'updated_at' => now(),
             ],
         ]);
-        return redirect()->route('chat.show', $chat);
+        
+        return request()->wantsJson()
+            ? response()->json($chat)
+            : redirect()->route('chat.show', $chat);
     }
 
     // group chat create
@@ -114,5 +120,24 @@ class ChatController extends Controller
         ChatMember::insert($members);
 
         return redirect()->route('chat.show', $chat);
+    }
+
+    public function searchUsers(Request $request)
+    {
+        $query = $request->get('q');
+
+        if (!$query || strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $users = User::where('id', '!=', Auth::id())
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                ->orWhere('username', 'like', "%{$query}%");
+            })
+            ->limit(5)
+            ->get(['id', 'name', 'username', 'avatar', 'is_online']);
+
+        return response()->json($users);
     }
 }

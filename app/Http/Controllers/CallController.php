@@ -7,6 +7,7 @@ use App\Models\CallParticipant;
 use App\Models\Chat;
 use App\Events\CallInitiated;
 use App\Events\CallSignal;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -74,32 +75,32 @@ class CallController extends Controller
     }
 
     // Call ছেড়ে দাও
-public function leave(CallRoom $callRoom)
-{
-    CallParticipant::where('call_room_id', $callRoom->id)
-        ->where('user_id', Auth::id())
-        ->update([
-            'left_at' => now(),
-            'status'  => 'left',
-        ]);
+    public function leave(CallRoom $callRoom)
+    {
+        CallParticipant::where('call_room_id', $callRoom->id)
+            ->where('user_id', Auth::id())
+            ->update([
+                'left_at' => now(),
+                'status'  => 'left',
+            ]);
 
-    $activeCount = CallParticipant::where('call_room_id', $callRoom->id)
-        ->where('status', 'joined')
-        ->count();
+        $activeCount = CallParticipant::where('call_room_id', $callRoom->id)
+            ->where('status', 'joined')
+            ->count();
 
-    if ($activeCount === 0) {
-        $callRoom->update([
-            'status'           => 'ended',
-            'ended_at'         => now(),
-            'duration_seconds' => now()->diffInSeconds($callRoom->started_at ?? now()),
-        ]);
+        if ($activeCount === 0) {
+            $callRoom->update([
+                'status'           => 'ended',
+                'ended_at'         => now(),
+                'duration_seconds' => now()->diffInSeconds($callRoom->started_at ?? now()),
+            ]);
+        }
+
+        // সবাইকে notify করো
+        broadcast(new \App\Events\CallEnded($callRoom))->toOthers();
+
+        return response()->json(['success' => true]);
     }
-
-    // সবাইকে notify করো
-    broadcast(new \App\Events\CallEnded($callRoom))->toOthers();
-
-    return response()->json(['success' => true]);
-}
 
     // WebRTC Signal পাঠাও
     public function signal(Request $request, CallRoom $callRoom)

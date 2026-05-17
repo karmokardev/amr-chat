@@ -16,6 +16,53 @@
         </button>
     </div>
 
+    {{-- Search --}}
+    <div class="relative p-3 border-b border-gray-200 dark:border-gray-700"
+        x-data="userSearch()">
+
+        <input
+            type="text"
+            x-model="query"
+            @input.debounce.300ms="search"
+            @keydown.escape="clear"
+            placeholder="Search users..."
+            class="w-full bg-gray-100 dark:bg-gray-800 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#D97757]">
+
+        {{-- Results --}}
+        <div x-show="results.length > 0"
+            x-cloak
+            class="absolute z-10 overflow-hidden bg-white border border-gray-200 shadow-lg left-3 right-3 top-14 dark:bg-gray-800 rounded-xl dark:border-gray-700">
+
+            <template x-for="user in results" :key="user.id">
+                <button @click="startChat(user.id)"
+                    class="flex items-center w-full gap-3 px-4 py-3 text-left transition hover:bg-gray-50 dark:hover:bg-gray-700">
+
+                    <div class="w-8 h-8 rounded-full bg-[#D97757] flex items-center justify-center text-white text-sm font-bold shrink-0"
+                        x-text="user.name.charAt(0).toUpperCase()">
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium truncate" x-text="user.name"></p>
+                        <p class="text-xs text-gray-400 truncate" x-text="'@' + user.username"></p>
+                    </div>
+
+                    <div class="w-2 h-2 rounded-full shrink-0"
+                        :class="user.is_online ? 'bg-green-400' : 'bg-gray-300'">
+                    </div>
+
+                </button>
+            </template>
+
+        </div>
+
+        {{-- No results --}}
+        <div x-show="query.length >= 2 && results.length === 0 && !isSearching"
+            x-cloak
+            class="absolute z-10 p-4 text-sm text-center text-gray-400 bg-white border border-gray-200 shadow-lg left-3 right-3 top-14 dark:bg-gray-800 rounded-xl dark:border-gray-700">
+            No users found
+        </div>
+
+    </div>
     {{-- Chat List --}}
     <div class="flex-1 overflow-y-auto">
         @forelse($chats as $chat)

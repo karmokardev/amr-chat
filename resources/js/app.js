@@ -4,6 +4,68 @@ import Alpine from "alpinejs";
 window.Alpine = Alpine;
 
 document.addEventListener("alpine:init", () => {
+    // search
+    Alpine.data("userSearch", () => ({
+        query: "",
+        results: [],
+        isSearching: false,
+
+        async search() {
+            if (this.query.length < 2) {
+                this.results = [];
+                return;
+            }
+
+            this.isSearching = true;
+
+            try {
+                const response = await fetch(
+                    `/users/search?q=${encodeURIComponent(this.query)}`,
+                    {
+                        headers: {
+                            "X-CSRF-TOKEN": document.querySelector(
+                                'meta[name="csrf-token"]',
+                            ).content,
+                        },
+                    },
+                );
+                this.results = await response.json();
+            } catch (err) {
+                this.results = [];
+            } finally {
+                this.isSearching = false;
+            }
+        },
+
+        async startChat(userId) {
+            const response = await fetch("/chats/private", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector(
+                        'meta[name="csrf-token"]',
+                    ).content,
+                },
+                body: JSON.stringify({ user_id: userId }),
+            });
+
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                const data = await response.json();
+                if (data.id) {
+                    window.location.href = `/chats/${data.id}`;
+                }
+            }
+        },
+
+        clear() {
+            this.query = "";
+            this.results = [];
+        },
+    }));
+
+    // chat
     Alpine.data("chatApp", (chatId) => ({
         chatId: chatId,
         newMessage: "",
@@ -35,6 +97,7 @@ document.addEventListener("alpine:init", () => {
             });
         },
 
+        // send message
         async sendMessage() {
             if (!this.newMessage.trim() || this.isSending) return;
 
@@ -66,6 +129,7 @@ document.addEventListener("alpine:init", () => {
             }
         },
 
+        // send file
         async sendFile(file) {
             if (this.isUploading) return;
             this.isUploading = true;

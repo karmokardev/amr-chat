@@ -40,6 +40,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/call-rooms/{callRoom}/join', [CallController::class, 'join'])->name('call.join');
     Route::post('/call-rooms/{callRoom}/leave', [CallController::class, 'leave'])->name('call.leave');
     Route::post('/call-rooms/{callRoom}/signal', [CallController::class, 'signal'])->name('call.signal');
+
+    // search
+    Route::get('/users/search', [ChatController::class, 'searchUsers'])->name('users.search');
+    
 });
 
 require __DIR__.'/auth.php';
