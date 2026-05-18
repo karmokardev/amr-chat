@@ -1,58 +1,276 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# AMR Chat 💬
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A real-time chat application built with Laravel, Alpine.js, and Laravel Reverb.
 
-## About Laravel
+![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?style=flat&logo=laravel)
+![Alpine.js](https://img.shields.io/badge/Alpine.js-3.x-8BC0D0?style=flat&logo=alpine.js)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.x-38B2AC?style=flat&logo=tailwind-css)
+![Laravel Reverb](https://img.shields.io/badge/Reverb-WebSocket-6875F5?style=flat)
+![Redis](https://img.shields.io/badge/Redis-Queue-DC382D?style=flat&logo=redis)
+![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?style=flat&logo=mysql)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ✨ Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Feature                     | Status |
+| --------------------------- | ------ |
+| Private Chat                | ✅     |
+| Group Chat                  | ✅     |
+| Real-time Messaging         | ✅     |
+| Typing Indicator            | ✅     |
+| Seen Status                 | ✅     |
+| File & Image Sharing        | ✅     |
+| Voice / Video Call (WebRTC) | ✅     |
+| Message Reply               | ✅     |
+| Message Reaction            | ✅     |
+| User Search                 | ✅     |
+| Online / Offline Status     | ✅     |
+| Unread Badge                | ✅     |
+| Profile Update & Avatar     | ✅     |
+| Dark / Light Mode           | ✅     |
+| Queue Support (Horizon)     | ✅     |
+| Browser Notification        | 🔜     |
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🛠 Tech Stack
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Layer      | Technology                 |
+| ---------- | -------------------------- |
+| Backend    | Laravel                    |
+| Frontend   | Blade + Alpine.js          |
+| Styling    | Tailwind CSS               |
+| Real-time  | Laravel Reverb (WebSocket) |
+| Queue      | Redis + Laravel Horizon    |
+| Database   | MySQL                      |
+| Video Call | WebRTC                     |
+| Auth       | Laravel Breeze             |
+| API Auth   | Laravel Sanctum            |
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+---
 
-## Agentic Development
+## 📋 Requirements
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+- PHP >= 8.2
+- Composer
+- Node.js >= 18
+- MySQL
+- Redis
+
+---
+
+## 🚀 Installation
+
+### 1. Clone the repository
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/karmokardev/amr-chat.git
+cd amr-chat
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Install dependencies
 
-## Contributing
+```bash
+composer install
+npm install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Environment setup
 
-## Code of Conduct
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Configure `.env`
 
-## Security Vulnerabilities
+```env
+APP_NAME="AMR Chat"
+APP_URL=http://localhost:8000
+APP_TIMEZONE=Asia/Dhaka
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=amr_chat
+DB_USERNAME=root
+DB_PASSWORD=
 
-## License
+BROADCAST_CONNECTION=reverb
+QUEUE_CONNECTION=redis
+CACHE_STORE=redis
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+REVERB_APP_ID=1
+REVERB_APP_KEY=amrchatkey
+REVERB_APP_SECRET=amrchatsecret
+REVERB_HOST="localhost"
+REVERB_PORT=8080
+REVERB_SCHEME=http
+
+VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"
+VITE_REVERB_HOST="${REVERB_HOST}"
+VITE_REVERB_PORT="${REVERB_PORT}"
+VITE_REVERB_SCHEME="${REVERB_SCHEME}"
+```
+
+### 5. Database setup
+
+```bash
+php artisan migrate
+php artisan storage:link
+```
+
+### 6. Build assets
+
+```bash
+npm run build
+```
+
+---
+
+## ▶️ Running the Application
+
+Run these commands in **3 separate terminals**:
+
+```bash
+# Terminal 1 — Laravel Server
+php artisan serve
+
+# Terminal 2 — Reverb WebSocket Server
+php artisan reverb:start
+
+# Terminal 3 — Queue Worker (Horizon)
+php artisan horizon
+```
+
+Then visit: **http://localhost:8000**
+
+---
+
+## 📁 Database Schema
+
+```
+users
+├── id, uuid, name, username, email
+├── avatar, is_online, last_seen_at
+└── created_at, updated_at
+
+chats
+├── id, uuid, type (private/group)
+├── name, avatar, created_by
+├── last_message_id
+└── created_at, updated_at
+
+chat_members
+├── id, chat_id, user_id
+├── role (owner/member)
+├── last_read_message_id
+├── is_muted, is_archived
+└── joined_at, timestamps
+
+messages
+├── id, chat_id, sender_id
+├── reply_to_id, type, message
+├── media_id, is_edited, edited_at
+├── is_deleted_for_everyone
+└── timestamps, deleted_at
+
+media
+├── id, uploaded_by, disk, path
+├── original_name, mime_type
+├── extension, size, thumbnail_path
+└── timestamps
+
+message_reads
+├── id, message_id, user_id
+└── read_at
+
+message_reactions
+├── id, message_id, user_id
+├── emoji
+└── timestamps
+
+call_rooms
+├── id, chat_id, created_by
+├── type (audio/video)
+├── status (waiting/active/ended)
+├── started_at, ended_at
+├── duration_seconds
+└── timestamps
+
+call_participants
+├── id, call_room_id, user_id
+├── joined_at, left_at
+├── is_audio_enabled, is_video_enabled
+├── status
+└── timestamps
+```
+
+---
+
+## 🔄 Real-time Flow
+
+```
+HTTP Request
+    │
+    ├── Controller
+    │       │
+    │       ├── DB Save
+    │       └── Queue Job dispatch
+    │                   │
+    │                   └── Reverb broadcast
+    │                           │
+    │                           └── Alpine.js listener
+    │                                   │
+    │                                   └── UI update (real-time)
+```
+
+---
+
+## 📡 WebSocket Channels
+
+| Channel                      | Event                 | Purpose          |
+| ---------------------------- | --------------------- | ---------------- |
+| `private-chat.{id}`          | `message.sent`        | New message      |
+| `private-chat.{id}`          | `call.initiated`      | Incoming call    |
+| `private-chat.{id}`          | `call.ended`          | Call ended       |
+| `private-chat.{id}`          | `message.reacted`     | Reaction update  |
+| `private-call.{id}.{userId}` | `call.signal`         | WebRTC signaling |
+| `online-status`              | `user.status.changed` | Online/offline   |
+
+---
+
+## 🎨 Brand
+
+- **Primary Color:** `#D97757`
+- **Theme:** Dark / Light mode toggle
+- **Font:** Figtree
+
+---
+
+## 📊 Queue Monitor
+
+Horizon dashboard available at:
+
+```
+http://localhost:8000/horizon
+```
+
+---
+
+## 👤 Author
+
+**Hridoy Karmokar**
+
+- GitHub: [@karmokardev](https://github.com/karmokardev)
+
+---
+
+## 📄 License
+
+This project is open-sourced under the [MIT License](LICENSE).
