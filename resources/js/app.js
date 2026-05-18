@@ -4,6 +4,44 @@ import Alpine from "alpinejs";
 window.Alpine = Alpine;
 
 document.addEventListener("alpine:init", () => {
+    Alpine.data("sidebarApp", (userId) => ({
+        chats: [],
+
+        init() {
+            this.listenForUpdates();
+        },
+
+        listenForUpdates() {
+            // সব chat এর জন্য listen করো
+            document.querySelectorAll('a[href^="/chats/"]').forEach((link) => {
+                const chatId = link.getAttribute("href").split("/chats/")[1];
+                if (!chatId || isNaN(chatId)) return;
+
+                window.Echo.private(`chat.${chatId}`).listen(
+                    ".message.sent",
+                    (e) => {
+                        this.updateChatItem(chatId, e.message);
+                    },
+                );
+            });
+        },
+
+        updateChatItem(chatId, message) {
+            const link = document.querySelector(`a[href="/chats/${chatId}"]`);
+            if (!link) return;
+
+            const preview = link.querySelector(".text-xs.text-gray-500");
+            if (preview) preview.textContent = message.message || "Sent a file";
+
+            const time = link.querySelector(".text-xs.text-gray-400");
+            if (time) time.textContent = "Just now";
+
+            // Sidebar এর উপরে নিয়ে আসো
+            const list = link.parentElement;
+            if (list) list.prepend(link);
+        },
+    }));
+
     // search
     Alpine.data("userSearch", () => ({
         query: "",
@@ -84,6 +122,7 @@ document.addEventListener("alpine:init", () => {
         peerConnection: null,
         isSending: false,
         isUploading: false,
+        messageReactions: {},
 
         init() {
             this.scrollToBottom();
@@ -92,6 +131,9 @@ document.addEventListener("alpine:init", () => {
             this.listenForOnlineStatus();
             window.addEventListener("set-reply", (e) => {
                 this.replyTo = e.detail;
+            });
+            window.addEventListener("react", (e) => {
+                this.sendReaction(e.detail.message_id, e.detail.emoji);
             });
         },
 
@@ -119,6 +161,52 @@ document.addEventListener("alpine:init", () => {
             this.$nextTick(() => {
                 const container = document.getElementById("messageContainer");
                 if (container) container.scrollTop = container.scrollHeight;
+            });
+        },
+        async sendReaction(messageId, emoji) {
+            const response = await fetch(`/messages/${messageId}/react`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector(
+                        'meta[name="csrf-token"]',
+                    ).content,
+                },
+                body: JSON.stringify({ emoji }),
+            });
+
+            const data = await response.json();
+            this.messageReactions[messageId] = data.reactions;
+            this.updateReactionDOM(messageId, data.reactions);
+        },
+
+        updateReactionDOM(messageId, reactions) {
+            const container = document.getElementById(`reactions-${messageId}`);
+            if (!container) return;
+
+            container.innerHTML = reactions
+                .map(
+                    (r) =>
+                        `<span onclick="window.dispatchEvent(new CustomEvent('react', { detail: { message_id: ${messageId}, emoji: '${r.emoji}' } }))"
+            class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-xs cursor-pointer hover:bg-gray-200 transition">
+            ${r.emoji} ${r.count}
+        </span>`,
+                )
+                .join("");
+        },
+        updateSidebarLastMessage(message) {
+            const chatLinks = document.querySelectorAll(
+                `a[href="/chats/${this.chatId}"]`,
+            );
+            chatLinks.forEach((link) => {
+                const preview = link.querySelector(".text-xs.text-gray-500");
+                if (preview) {
+                    preview.textContent = message.message || "Sent a file";
+                }
+                const time = link.querySelector(".text-xs.text-gray-400");
+                if (time) {
+                    time.textContent = "Just now";
+                }
             });
         },
         setReply(message) {
@@ -234,6 +322,12 @@ document.addEventListener("alpine:init", () => {
                     this.messages.push(e.message);
                     this.scrollToBottom();
                     this.markAsRead();
+                    this.updateSidebarLastMessage(e.message);
+                    window.dispatchEvent(
+                        new CustomEvent("new-message", {
+                            detail: { chatId: this.chatId, message: e.message },
+                        }),
+                    );
                 })
                 .listen(".call.initiated", (e) => {
                     // নিজের call নিজে দেখবে না
@@ -262,6 +356,10 @@ document.addEventListener("alpine:init", () => {
                         this.localStream = null;
                         alert("Call ended.");
                     }
+                })
+                .listen(".message.reacted", (e) => {
+                    this.messageReactions[e.message_id] = e.reactions;
+                    this.updateReactionDOM(e.message_id, e.reactions);
                 });
         },
 

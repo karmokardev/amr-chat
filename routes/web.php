@@ -5,6 +5,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReactionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => redirect()->route('chat.index'));
@@ -43,6 +44,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // search
     Route::get('/users/search', [ChatController::class, 'searchUsers'])->name('users.search');
+
+    // reaction
+    Route::post('/messages/{message}/react', [ReactionController::class, 'toggle'])->name('message.react');
     
 });
 

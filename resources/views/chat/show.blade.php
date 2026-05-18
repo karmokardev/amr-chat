@@ -3,8 +3,18 @@
 @section('content')
 
 {{-- Sidebar --}}
-<div class="flex flex-col border-r border-gray-200 w-80 dark:border-gray-700">
-
+<div class="flex flex-col border-r border-gray-200 w-80 dark:border-gray-700"
+    x-data="{}"
+    @new-message.window="
+        const link = document.querySelector('a[href=\'/chats/\' + $event.detail.chatId]');
+        if (link) {
+            const preview = link.querySelector('.text-xs.text-gray-500');
+            if (preview) preview.textContent = $event.detail.message.message || 'Sent a file';
+            const time = link.querySelector('.text-xs.text-gray-400');
+            if (time) time.textContent = 'Just now';
+            link.parentElement?.prepend(link);
+        }
+    ">
     {{-- Header --}}
     <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         <h2 class="text-lg font-semibold">Chats</h2>
@@ -215,9 +225,28 @@
 
                 <div class="max-w-xs lg:max-w-md group">
 
-                    {{-- Reply button --}}
-                    <div class="flex {{ $message->sender_id === Auth::id() ? 'justify-end' : 'justify-start' }} mb-1 opacity-0 group-hover:opacity-100 transition">
-                        <button onclick="window.Alpine && window.dispatchEvent(new CustomEvent('set-reply', { detail: {
+                    {{-- Actions --}}
+                    <div class="flex {{ $message->sender_id === Auth::id() ? 'justify-end' : 'justify-start' }} items-center gap-2 mb-1 opacity-0 group-hover:opacity-100 transition">
+
+                        {{-- Emoji picker --}}
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="text-xs text-gray-400 hover:text-[#D97757] transition px-2">
+                                😊
+                            </button>
+                            <div x-show="open" x-cloak @click.outside="open = false"
+                                class="absolute bottom-6 {{ $message->sender_id === Auth::id() ? 'right-0' : 'left-0' }} bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-2 flex gap-1 z-10">
+                                @foreach(['👍', '❤️', '😂', '😮', '😢', '😡'] as $emoji)
+                                    <button @click="open = false; window.dispatchEvent(new CustomEvent('react', { detail: { message_id: {{ $message->id }}, emoji: '{{ $emoji }}' } }))"
+                                        class="text-lg transition-transform hover:scale-125">
+                                        {{ $emoji }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        {{-- Reply --}}
+                        <button onclick="window.dispatchEvent(new CustomEvent('set-reply', { detail: {
                             id: {{ $message->id }},
                             message: '{{ addslashes($message->message) }}',
                             sender: { name: '{{ addslashes($message->sender->name) }}' }
@@ -225,6 +254,7 @@
                             class="text-xs text-gray-400 hover:text-[#D97757] transition px-2">
                             ↩ Reply
                         </button>
+
                     </div>
 
                     <div class="px-4 py-2 rounded-2xl text-sm
@@ -249,6 +279,17 @@
                             </a>
                         @else
                             {{ $message->message }}
+                        @endif
+                        {{-- Reactions --}}
+                        @if($message->reactions->count() > 0)
+                            <div class="flex flex-wrap gap-1 mt-1" id="reactions-{{ $message->id }}">
+                                @foreach($message->reactions->groupBy('emoji') as $emoji => $reactions)
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-xs cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                                        onclick="window.dispatchEvent(new CustomEvent('react', { detail: { message_id: {{ $message->id }}, emoji: '{{ $emoji }}' } }))">
+                                        {{ $emoji }} {{ $reactions->count() }}
+                                    </span>
+                                @endforeach
+                            </div>
                         @endif
 
                     </div>
@@ -287,6 +328,17 @@
 
                         <span x-text="message.message"></span>
 
+                    </div>
+                    {{-- Dynamic Reactions --}}
+                    <div class="flex flex-wrap gap-1 mt-1"
+                        x-show="messageReactions[message.id]?.length > 0">
+                        <template x-for="reaction in (messageReactions[message.id] || [])" :key="reaction.emoji">
+                            <span @click="sendReaction(message.id, reaction.emoji)"
+                                class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-xs cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                                <span x-text="reaction.emoji"></span>
+                                <span x-text="reaction.count"></span>
+                            </span>
+                        </template>
                     </div>
 
                 </div>

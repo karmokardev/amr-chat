@@ -28,7 +28,7 @@ class ChatController extends Controller
         $this->authorize('view', $chat);
 
         $messages = $chat->messages()
-        ->with(['sender','media','replyTo.sender'])
+        ->with(['sender','media','replyTo.sender','reactions'])
         ->latest()
         ->paginate(50);
 
