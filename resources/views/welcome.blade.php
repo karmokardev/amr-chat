@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="min-h-screen flex flex-col text-white bg-gradient-to-br from-[#1A120F] via-[#2A1B16] to-[#120D0B]">
 
     <!-- Navbar -->
@@ -21,18 +23,18 @@
             <div class="space-x-4">
                 @auth
                     <a href="{{ url('/dashboard') }}"
-                       class="px-5 py-2 transition border rounded-xl border-white/20 hover:bg-white/10">
+                        class="px-5 py-2 transition border rounded-xl border-white/20 hover:bg-white/10">
                         Dashboard
                     </a>
                 @else
                     <a href="{{ route('login') }}"
-                       class="px-5 py-2 transition border rounded-xl border-white/20 hover:bg-white/10">
+                        class="px-5 py-2 transition border rounded-xl border-white/20 hover:bg-white/10">
                         Login
                     </a>
 
                     @if (Route::has('register'))
                         <a href="{{ route('register') }}"
-                           class="px-5 py-2 rounded-xl bg-[#D97757] hover:bg-[#c96a4b] transition shadow-lg shadow-[#D97757]/30">
+                            class="px-5 py-2 rounded-xl bg-[#D97757] hover:bg-[#c96a4b] transition shadow-lg shadow-[#D97757]/30">
                             Register
                         </a>
                     @endif
@@ -50,7 +52,8 @@
             <!-- Left -->
             <div class="max-w-2xl">
 
-                <div class="inline-block px-4 py-2 mb-6 text-sm rounded-full bg-[#D97757]/20 text-[#D97757] border border-[#D97757]/20">
+                <div
+                    class="inline-block px-4 py-2 mb-6 text-sm rounded-full bg-[#D97757]/20 text-[#D97757] border border-[#D97757]/20">
                     Modern Realtime Messaging
                 </div>
 
@@ -68,12 +71,12 @@
                 <div class="flex gap-5 mt-10">
 
                     <a href="{{ route('register') }}"
-                       class="px-8 py-4 rounded-2xl bg-[#D97757] hover:bg-[#c96a4b] transition text-lg font-semibold shadow-2xl shadow-[#D97757]/30">
+                        class="px-8 py-4 rounded-2xl bg-[#D97757] hover:bg-[#c96a4b] transition text-lg font-semibold shadow-2xl shadow-[#D97757]/30">
                         Start Chatting
                     </a>
 
                     <a href="{{ route('login') }}"
-                       class="px-8 py-4 text-lg transition border rounded-2xl border-white/20 hover:bg-white/10">
+                        class="px-8 py-4 text-lg transition border rounded-2xl border-white/20 hover:bg-white/10">
                         Login
                     </a>
 
@@ -140,15 +143,11 @@
                     <!-- Input -->
                     <div class="flex items-center gap-3 mt-6">
 
-                        <input
-                            type="text"
-                            placeholder="Type a message..."
-                            class="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#D97757] transition"
-                        >
+                        <input type="text" placeholder="Type a message..."
+                            class="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-[#D97757] transition">
 
                         <button
-                            class="bg-[#D97757] hover:bg-[#c96a4b] transition px-4 py-2.5 rounded-xl shadow-lg shadow-[#D97757]/20"
-                        >
+                            class="bg-[#D97757] hover:bg-[#c96a4b] transition px-4 py-2.5 rounded-xl shadow-lg shadow-[#D97757]/20">
                             ➤
                         </button>
 
@@ -159,7 +158,8 @@
                 <!-- Glow -->
                 <div class="absolute -top-10 -left-10 w-40 h-40 bg-[#D97757] rounded-full blur-3xl opacity-30"></div>
 
-                <div class="absolute w-40 h-40 bg-orange-400 rounded-full -bottom-10 -right-10 blur-3xl opacity-20"></div>
+                <div class="absolute w-40 h-40 bg-orange-400 rounded-full -bottom-10 -right-10 blur-3xl opacity-20">
+                </div>
 
             </div>
 
@@ -172,10 +172,12 @@
         © {{ date('Y') }}
         <span class="text-[#D97757] font-semibold">amr_chat</span>.
         All rights reserved by
-        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D97757]/15 border border-[#D97757]/30 text-[#D97757] font-semibold tracking-wide shadow-lg shadow-[#D97757]/10 backdrop-blur-md hover:scale-105 transition duration-300">
-    ✦ karmokardev
-</span>
+        <span
+            class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D97757]/15 border border-[#D97757]/30 text-[#D97757] font-semibold tracking-wide shadow-lg shadow-[#D97757]/10 backdrop-blur-md hover:scale-105 transition duration-300">
+            ✦ karmokardev
+        </span>
     </footer>
 
 </body>
+
 </html>
